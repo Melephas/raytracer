@@ -2,9 +2,14 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"log"
 	"os"
+	"raytracer/internal/camera"
+	"raytracer/internal/hittable"
+	"raytracer/internal/primitives"
+	"raytracer/internal/shape"
 )
 
 const (
@@ -16,9 +21,19 @@ const (
 )
 
 // OutputFile is the name of the file to which the render will be saved.
-var OutputFile string
+var (
+	OutputFile      string
+	SamplesPerPixel int
+)
+
+func init() {
+	flag.IntVar(&SamplesPerPixel, "s", 100, "Number of samples per pixel")
+	flag.StringVar(&OutputFile, "o", "output.ppm", "Name of the output file")
+}
 
 func main() {
+	flag.Parse()
+
 	// Open output file and schedule cleanup.
 	outputWriter, closeFunc, err := GetOutputWriter()
 	if err != nil {
@@ -27,17 +42,17 @@ func main() {
 	defer closeFunc()
 
 	// World setup.
-	world := NewHittableList()
-	world.Add(Sphere{Vec3{0, 0, -1}, 0.5})
-	world.Add(Sphere{Vec3{0, -100.5, -1}, 100})
+	world := hittable.NewList()
+	world.Add(shape.Sphere{Center: primitives.Vector{I: 0, J: 0, K: -1}, Radius: 0.5})
+	world.Add(shape.Sphere{Center: primitives.Vector{I: 0, J: -100.5, K: -1}, Radius: 100})
 
 	// Camera setup.
-	camera := DefaultCamera()
-	camera.AspectRatio = AspectRatio
-	camera.ImageWidth = ImageWidth
-	camera.SamplesPerPixel = 100
+	cam := camera.DefaultCamera()
+	cam.AspectRatio = AspectRatio
+	cam.ImageWidth = ImageWidth
+	cam.SamplesPerPixel = SamplesPerPixel
 
-	if err := camera.Render(outputWriter, world); err != nil {
+	if err := cam.Render(outputWriter, world); err != nil {
 		log.Fatalf("Error rendering image: %v", err)
 	}
 
@@ -51,10 +66,6 @@ func main() {
 
 // GetOutputWriter returns a writer for the output file and a cleanup function to close the file.
 func GetOutputWriter() (*bufio.Writer, func(), error) {
-	if len(os.Args) >= 2 {
-		OutputFile = os.Args[1]
-	}
-
 	if OutputFile == "" {
 		OutputFile = "output.ppm"
 	}

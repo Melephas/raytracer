@@ -1,15 +1,19 @@
-package main
+package shape
 
-import "math"
+import (
+	"math"
+	"raytracer/internal/hittable"
+	"raytracer/internal/primitives"
+)
 
 // Sphere represents a 3D sphere.
 type Sphere struct {
-	Center Vec3
+	Center primitives.Vector
 	Radius float64
 }
 
 // Hit determines if a ray hits the sphere within the given interval.
-func (s Sphere) Hit(ray Ray, rayT Interval, hitRecord *HitRecord) bool {
+func (s Sphere) Hit(ray primitives.Ray, rayT primitives.Interval, hitRecord *hittable.HitRecord) bool {
 	oc := s.Center.Sub(ray.Origin)
 	a := ray.Direction.LengthSquared()
 	h := ray.Direction.Dot(oc)

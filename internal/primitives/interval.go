@@ -1,7 +1,8 @@
-package main
+package primitives
 
 import (
 	"math"
+	"raytracer/internal"
 )
 
 // Interval represents a range between a minimum and maximum value.
@@ -43,4 +44,9 @@ func (i Interval) Clamp(x float64) float64 {
 	}
 
 	return x
+}
+
+// RandomFloatInInterval returns a random float in the given interval, i.e. [min, max).
+func RandomFloatInInterval(i Interval) float64 {
+	return i.Min + internal.RandomFloat()*(i.Size())
 }
