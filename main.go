@@ -16,8 +16,8 @@ const (
 	// AspectRatio is the target aspect ratio for the rendered image.
 	AspectRatio = 16.0 / 9.0
 	// ImageWidth is the width of the rendered image in pixels.
-	ImageWidth = 1920
-	//ImageWidth  = 1280
+	//ImageWidth = 1920
+	ImageWidth = 1280
 )
 
 // OutputFile is the name of the file to which the render will be saved.
@@ -27,7 +27,7 @@ var (
 )
 
 func init() {
-	flag.IntVar(&SamplesPerPixel, "s", 100, "Number of samples per pixel")
+	flag.IntVar(&SamplesPerPixel, "s", 10, "Number of samples per pixel")
 	flag.StringVar(&OutputFile, "o", "output.ppm", "Name of the output file")
 }
 
@@ -41,10 +41,18 @@ func main() {
 	}
 	defer closeFunc()
 
+	// Material setup.
+	silver := hittable.Metal{Albedo: primitives.Vector{I: 0.8, J: 0.8, K: 0.8}, Fuzz: 0.1}
+	gold := hittable.Metal{Albedo: primitives.Vector{I: 0.8, J: 0.65, K: 0.1}, Fuzz: 0.9}
+	gray := hittable.Lambertian{Albedo: primitives.Vector{I: 0.5, J: 0.5, K: 0.5}}
+	green := hittable.Lambertian{Albedo: primitives.Vector{I: 81.0 / 256.0, J: 214.0 / 256.0, K: 84.0 / 256.0}}
+
 	// World setup.
 	world := hittable.NewList()
-	world.Add(shape.Sphere{Center: primitives.Vector{I: 0, J: 0, K: -1}, Radius: 0.5})
-	world.Add(shape.Sphere{Center: primitives.Vector{I: 0, J: -100.5, K: -1}, Radius: 100})
+	world.Add(shape.Sphere{Center: primitives.Vector{I: 0, J: 0.5, K: -1.5}, Radius: 0.5, Material: gray})
+	world.Add(shape.Sphere{Center: primitives.Vector{I: -1, J: 0, K: -1}, Radius: 0.5, Material: silver})
+	world.Add(shape.Sphere{Center: primitives.Vector{I: 1, J: 0, K: -1}, Radius: 0.5, Material: gold})
+	world.Add(shape.Sphere{Center: primitives.Vector{I: 0, J: -100.5, K: -1}, Radius: 100, Material: green})
 
 	// Camera setup.
 	cam := camera.DefaultCamera()
@@ -53,8 +61,9 @@ func main() {
 	cam.SamplesPerPixel = SamplesPerPixel
 
 	if err := cam.Render(outputWriter, world); err != nil {
-		log.Fatalf("Error rendering image: %v", err)
+		log.Fatalf("\nError rendering image: %v", err)
 	}
+	fmt.Println()
 
 	// Flush output file.
 	if err := outputWriter.Flush(); err != nil {

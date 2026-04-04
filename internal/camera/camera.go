@@ -47,7 +47,8 @@ func (c *Camera) Render(out io.Writer, world hittable.Hittable) error {
 		progressbar.OptionShowCount(),
 		progressbar.OptionEnableColorCodes(true),
 		progressbar.OptionFullWidth(),
-		progressbar.OptionClearOnFinish(),
+		//progressbar.OptionClearOnFinish(),
+		progressbar.OptionShowElapsedTimeOnFinish(),
 		progressbar.OptionSetTheme(progressbar.Theme{
 			Saucer:        "[green]=[reset]",
 			SaucerHead:    "[green]>[reset]",
@@ -114,10 +115,13 @@ func (c *Camera) RayColor(r primitives.Ray, depth int, world hittable.Hittable) 
 		return primitives.Vector{}
 	}
 
-	var rec hittable.HitRecord
-	if world.Hit(r, primitives.Interval{Min: 0.001, Max: math.Inf(1)}, &rec) {
-		direction := primitives.RandomInHemisphere(rec.Normal).Add(rec.Normal)
-		return c.RayColor(primitives.Ray{Origin: rec.P, Direction: direction}, depth-1, world).Scale(0.5)
+	rec, hit := world.Hit(r, primitives.Interval{Min: 0.001, Max: math.Inf(1)})
+	if hit {
+		scattered, attenuation, ok := rec.Material.Scatter(r, *rec)
+		if !ok {
+			return primitives.Vector{}
+		}
+		return attenuation.ColorMultiply(c.RayColor(scattered, depth-1, world))
 	}
 
 	unitDirection := r.Direction.Normalize()

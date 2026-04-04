@@ -22,18 +22,23 @@ func (l *List) Add(hittable Hittable) {
 }
 
 // Hit determines if a ray hits any object in the list and returns the closest hit.
-func (l *List) Hit(ray primitives.Ray, rayT primitives.Interval, hitRecord *HitRecord) bool {
-	var tempRec HitRecord
+func (l *List) Hit(ray primitives.Ray, rayT primitives.Interval) (*HitRecord, bool) {
+	var closestHit *HitRecord
 	hitAnything := false
 	closestSoFar := rayT.Max
 
 	for _, object := range l.Objects {
-		if object.Hit(ray, primitives.Interval{Min: rayT.Min, Max: closestSoFar}, &tempRec) {
+		hitRec, hit := object.Hit(ray, primitives.Interval{Min: rayT.Min, Max: closestSoFar})
+		if hit {
 			hitAnything = true
-			closestSoFar = tempRec.T
-			*hitRecord = tempRec
+			closestSoFar = hitRec.T
+			closestHit = hitRec
 		}
 	}
 
-	return hitAnything
+	if hitAnything {
+		return closestHit, true
+	}
+
+	return nil, false
 }

@@ -8,12 +8,13 @@ import (
 
 // Sphere represents a 3D sphere.
 type Sphere struct {
-	Center primitives.Vector
-	Radius float64
+	Center   primitives.Vector
+	Radius   float64
+	Material hittable.Material
 }
 
 // Hit determines if a ray hits the sphere within the given interval.
-func (s Sphere) Hit(ray primitives.Ray, rayT primitives.Interval, hitRecord *hittable.HitRecord) bool {
+func (s Sphere) Hit(ray primitives.Ray, rayT primitives.Interval) (*hittable.HitRecord, bool) {
 	oc := s.Center.Sub(ray.Origin)
 	a := ray.Direction.LengthSquared()
 	h := ray.Direction.Dot(oc)
@@ -21,7 +22,7 @@ func (s Sphere) Hit(ray primitives.Ray, rayT primitives.Interval, hitRecord *hit
 
 	discriminant := h*h - a*c
 	if discriminant < 0 {
-		return false
+		return nil, false
 	}
 
 	sqrtDiscriminant := math.Sqrt(discriminant)
@@ -31,14 +32,19 @@ func (s Sphere) Hit(ray primitives.Ray, rayT primitives.Interval, hitRecord *hit
 	if !rayT.Surrounds(root) {
 		root = (h + sqrtDiscriminant) / a
 		if !rayT.Surrounds(root) {
-			return false
+			return nil, false
 		}
 	}
 
-	hitRecord.T = root
-	hitRecord.P = ray.At(root)
-	hitRecord.Normal = hitRecord.P.Sub(s.Center).Scale(1 / s.Radius)
-	outwardNormal := hitRecord.P.Sub(s.Center).Scale(1 / s.Radius)
-	hitRecord.SetFaceNormal(ray, outwardNormal)
-	return true
+	// Create a record for the hit with the normal pointing outward from the sphere.
+	outwardNormal := ray.At(root).Sub(s.Center).Scale(1 / s.Radius)
+	hitRecord := hittable.HitRecord{
+		T:        root,
+		P:        ray.At(root),
+		Normal:   outwardNormal,
+		Material: s.Material,
+	}
+	hitRecord = hitRecord.SetFaceNormal(ray, outwardNormal)
+
+	return &hitRecord, true
 }

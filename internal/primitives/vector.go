@@ -116,10 +116,22 @@ func (v Vector) Cross(other Vector) Vector {
 	}
 }
 
-// Random returns a Vector with random components in [0, 1).
-func Random() Vector {
-	return Vector{internal.RandomFloat(), internal.RandomFloat(), internal.RandomFloat()}
+func (v Vector) NearZero() bool {
+	return v.LengthSquared() < 1e-160
 }
+
+func (v Vector) ColorMultiply(other Vector) Vector {
+	return Vector{v.R() * other.R(), v.G() * other.G(), v.B() * other.B()}
+}
+
+func (v Vector) Reflect(normal Vector) Vector {
+	return normal.Scale(-2 * v.Dot(normal)).Add(v)
+}
+
+//// Random returns a Vector with random components in [0, 1).
+//func Random() Vector {
+//	return Vector{internal.RandomFloat(), internal.RandomFloat(), internal.RandomFloat()}
+//}
 
 func RandomInRange(i Interval) Vector {
 	return Vector{
@@ -129,7 +141,7 @@ func RandomInRange(i Interval) Vector {
 	}
 }
 
-func RandomUnitVec3() Vector {
+func RandomUnitVector() Vector {
 	for {
 		p := RandomInRange(Interval{-1, 1})
 		l := p.LengthSquared()
@@ -139,13 +151,13 @@ func RandomUnitVec3() Vector {
 	}
 }
 
-func RandomInHemisphere(normal Vector) Vector {
-	unitVector := RandomUnitVec3()
-	if unitVector.Dot(normal) > 0 {
-		return unitVector
-	}
-	return unitVector.Negate()
-}
+//func RandomInHemisphere(normal Vector) Vector {
+//	unitVector := RandomUnitVector()
+//	if unitVector.Dot(normal) > 0 {
+//		return unitVector
+//	}
+//	return unitVector.Negate()
+//}
 
 // WriteColor writes a color to the given writer.
 func WriteColor(w io.Writer, color Vector) error {
