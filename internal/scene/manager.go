@@ -1,7 +1,7 @@
 package scene
 
 import (
-	"encoding/json/v2"
+	"encoding/json"
 	"io"
 	"raytracer/internal/hittable"
 	"raytracer/internal/primitives"
@@ -28,7 +28,11 @@ type Manager struct {
 
 func LoadScene(r io.Reader) (*Manager, error) {
 	var manager Manager
-	if err := json.UnmarshalRead(r, &manager); err != nil {
+	bytes, err := io.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(bytes, &manager); err != nil {
 		return nil, err
 	}
 	return &manager, nil
