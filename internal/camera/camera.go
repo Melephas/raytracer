@@ -8,6 +8,7 @@ import (
 	"raytracer/internal"
 	"raytracer/internal/hittable"
 	"raytracer/internal/primitives"
+	"sync"
 
 	"github.com/schollz/progressbar/v3"
 )
@@ -19,6 +20,7 @@ type Camera struct {
 	AspectRatio, SamplesScale float64
 	ImageWidth, ImageHeight   int
 	SamplesPerPixel, MaxDepth int
+	Parallel                  bool
 }
 
 // DefaultCamera returns a camera with default values.
@@ -58,20 +60,61 @@ func (c *Camera) Render(out io.Writer, world hittable.Hittable) error {
 		}),
 	)
 
-	for j := range c.ImageHeight {
-		for i := range c.ImageWidth {
+	if c.Parallel {
+		var waitGroup sync.WaitGroup
+		var mutex sync.Mutex
+		output := make([]primitives.Vector, c.ImageHeight*c.ImageWidth)
+		calculatePixel := func(i, j int, mutex *sync.Mutex, output []primitives.Vector) {
+			// calculatePixel := func() {
 			pixelColor := primitives.Vector{}
 			for range c.SamplesPerPixel {
 				r := c.GetRay(i, j)
 				pixelColor = pixelColor.Add(c.RayColor(r, c.MaxDepth, world))
 			}
+			finalColor := pixelColor.Scale(c.SamplesScale)
 
-			if err := primitives.WriteColor(out, pixelColor.Scale(c.SamplesScale)); err != nil {
+			mutex.Lock()
+			output[i*j] = finalColor
+			mutex.Unlock()
+		}
+
+		for j := range c.ImageHeight {
+			for i := range c.ImageWidth {
+				waitGroup.Go(func() {
+					calculatePixel(i, j, &mutex, output)
+				})
+			}
+			if err := progressBar.Add(1); err != nil {
+				return err
+			}
+		}
+
+		waitGroup.Wait()
+		fmt.Printf("Done.\n")
+
+		mutex.Lock()
+		for i := range len(output) {
+			if err := primitives.WriteColor(out, output[i]); err != nil {
 				log.Fatalf("Error writing color to file: %v", err)
 			}
 		}
-		if err := progressBar.Add(1); err != nil {
-			return err
+		mutex.Unlock()
+	} else {
+		for j := range c.ImageHeight {
+			for i := range c.ImageWidth {
+				pixelColor := primitives.Vector{}
+				for range c.SamplesPerPixel {
+					r := c.GetRay(i, j)
+					pixelColor = pixelColor.Add(c.RayColor(r, c.MaxDepth, world))
+				}
+
+				if err := primitives.WriteColor(out, pixelColor.Scale(c.SamplesScale)); err != nil {
+					log.Fatalf("Error writing color to file: %v", err)
+				}
+			}
+			if err := progressBar.Add(1); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -81,11 +124,7 @@ func (c *Camera) Render(out io.Writer, world hittable.Hittable) error {
 // Initialise calculates the derived camera parameters.
 func (c *Camera) Initialise() {
 	imageHeight := int(float64(c.ImageWidth) / c.AspectRatio)
-	if imageHeight < 1 {
-		c.ImageHeight = 1
-	} else {
-		c.ImageHeight = imageHeight
-	}
+	c.ImageHeight = max(imageHeight, 1)
 
 	c.SamplesScale = 1.0 / float64(c.SamplesPerPixel)
 

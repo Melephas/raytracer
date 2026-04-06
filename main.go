@@ -24,11 +24,13 @@ const (
 var (
 	OutputFile      string
 	SamplesPerPixel int
+	Parallel bool
 )
 
 func init() {
 	flag.IntVar(&SamplesPerPixel, "s", 10, "Number of samples per pixel")
 	flag.StringVar(&OutputFile, "o", "output.ppm", "Name of the output file")
+	flag.BoolVar(&Parallel, "p", false, "Enable parallel computation")
 }
 
 func main() {
@@ -42,8 +44,8 @@ func main() {
 	defer closeFunc()
 
 	// Material setup.
-	silver := hittable.Metal{Albedo: primitives.Vector{I: 0.8, J: 0.8, K: 0.8}, Fuzz: 0.1}
-	gold := hittable.Metal{Albedo: primitives.Vector{I: 0.8, J: 0.65, K: 0.1}, Fuzz: 0.9}
+	silver := hittable.Metal{Albedo: primitives.Vector{I: 0.8, J: 0.8, K: 0.8}, Fuzz: 0.01}
+	gold := hittable.Metal{Albedo: primitives.Vector{I: 0.8, J: 0.65, K: 0.1}, Fuzz: 0.5}
 	gray := hittable.Lambertian{Albedo: primitives.Vector{I: 0.5, J: 0.5, K: 0.5}}
 	green := hittable.Lambertian{Albedo: primitives.Vector{I: 81.0 / 256.0, J: 214.0 / 256.0, K: 84.0 / 256.0}}
 
@@ -59,6 +61,7 @@ func main() {
 	cam.AspectRatio = AspectRatio
 	cam.ImageWidth = ImageWidth
 	cam.SamplesPerPixel = SamplesPerPixel
+	cam.Parallel = Parallel
 
 	if err := cam.Render(outputWriter, world); err != nil {
 		log.Fatalf("\nError rendering image: %v", err)
