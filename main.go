@@ -24,7 +24,7 @@ const (
 var (
 	OutputFile      string
 	SamplesPerPixel int
-	Parallel bool
+	Parallel        bool
 )
 
 func init() {

@@ -74,7 +74,7 @@ func (c *Camera) Render(out io.Writer, world hittable.Hittable) error {
 			finalColor := pixelColor.Scale(c.SamplesScale)
 
 			mutex.Lock()
-			output[i*j] = finalColor
+			output[i+(j*c.ImageWidth)] = finalColor
 			mutex.Unlock()
 		}
 
