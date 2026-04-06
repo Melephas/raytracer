@@ -6,7 +6,7 @@ This is a personal project for learning and experimenting with Go.
 
 ## Features
 
-- **Concurrent Rendering**: Fully leverages multicore processors for significantly faster rendering times using Go's goroutines.
+- **Concurrent Rendering**: Fully leverages multicore processors for significantly faster rendering times using Go's goroutines (~5x speedup).
 - **JSON-Driven Scenes**: Define materials and shapes in a clean, human-readable JSON format.
 - **Materials Support**:
   - **Lambertian (Diffuse)**: For non-reflective, matte surfaces.
