@@ -4,9 +4,15 @@ A ray tracer written in Go. This project implements a path tracing algorithm to 
 
 This is a personal project for learning and experimenting with Go.
 
+## Example
+
+![output](https://github.com/user-attachments/assets/10a8df2f-2fa2-4af1-bbe4-5718515bb8d3)
+
+Generated with the example scene at 1024 samples-per-pixel
+
 ## Features
 
-- **Concurrent Rendering**: Fully leverages multicore processors for significantly faster rendering times using Go's goroutines.
+- **Concurrent Rendering**: Fully leverages multicore processors for significantly faster rendering times using Go's goroutines (~5x speedup).
 - **JSON-Driven Scenes**: Define materials and shapes in a clean, human-readable JSON format.
 - **Materials Support**:
   - **Lambertian (Diffuse)**: For non-reflective, matte surfaces.
