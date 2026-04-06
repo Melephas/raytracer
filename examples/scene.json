@@ -3,12 +3,12 @@
         "silver": {
             "type": "metal",
             "albedo": [0.8, 0.8, 0.8],
-            "fuzz": 0.01
+            "fuzz": 0
         },
         "gold": {
             "type": "metal",
             "albedo": [0.8, 0.65, 0.1],
-            "fuzz": 0.5
+            "fuzz": 0
         },
         "ground":{
             "type": "lambertian",
