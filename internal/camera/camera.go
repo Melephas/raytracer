@@ -36,7 +36,7 @@ func DefaultCamera() *Camera {
 
 // Render renders the scene to the provided output writer using the given world.
 func (c *Camera) Render(out io.Writer, world hittable.Hittable) error {
-	c.Initialise()
+	//c.Initialise()
 
 	// Write output file header.
 	if _, err := fmt.Fprintf(out, "P3\n%d %d\n255\n", c.ImageWidth, c.ImageHeight); err != nil {
@@ -90,7 +90,6 @@ func (c *Camera) Render(out io.Writer, world hittable.Hittable) error {
 		}
 
 		waitGroup.Wait()
-		fmt.Printf("Done.\n")
 
 		mutex.Lock()
 		for i := range len(output) {
