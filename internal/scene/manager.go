@@ -3,15 +3,17 @@ package scene
 import (
 	"encoding/json"
 	"io"
+	"raytracer/internal/camera"
 	"raytracer/internal/hittable"
 	"raytracer/internal/primitives"
 	"raytracer/internal/shape"
 )
 
 type Material struct {
-	Type   string     `json:"type"`
-	Albedo [3]float64 `json:"albedo"`
-	Fuzz   float64    `json:"fuzz"`
+	Type            string     `json:"type"`
+	Albedo          [3]float64 `json:"albedo"`
+	Fuzz            float64    `json:"fuzz"`
+	RefractionIndex float64    `json:"refractionIndex"`
 }
 
 type Shape struct {
@@ -21,9 +23,19 @@ type Shape struct {
 	Material string     `json:"material"`
 }
 
+type Camera struct {
+	Position    [3]float64 `json:"position"`
+	LookAt      [3]float64 `json:"lookAt"`
+	Up          [3]float64 `json:"up"`
+	FOV         float64    `json:"fov"`
+	SpaceColor  [3]float64 `json:"spaceColor"`
+	GroundColor [3]float64 `json:"groundColor"`
+}
+
 type Manager struct {
 	Materials map[string]Material `json:"materials"`
 	Scene     []Shape             `json:"scene"`
+	Camera    Camera              `json:"camera"`
 }
 
 func LoadScene(r io.Reader) (*Manager, error) {
@@ -42,20 +54,16 @@ func (m Material) ToMaterial() hittable.Material {
 	switch m.Type {
 	case "lambertian":
 		return hittable.Lambertian{
-			Albedo: primitives.Vector{
-				I: m.Albedo[0],
-				J: m.Albedo[1],
-				K: m.Albedo[2],
-			},
+			Albedo: ConvertToVector(m.Albedo),
 		}
 	case "metal":
 		return hittable.Metal{
-			Albedo: primitives.Vector{
-				I: m.Albedo[0],
-				J: m.Albedo[1],
-				K: m.Albedo[2],
-			},
-			Fuzz: m.Fuzz,
+			Albedo: ConvertToVector(m.Albedo),
+			Fuzz:   m.Fuzz,
+		}
+	case "dielectric":
+		return hittable.Dielectric{
+			RefractionIndex: m.RefractionIndex,
 		}
 	default:
 		return nil
@@ -71,11 +79,7 @@ func (s Shape) ToHittable(manager *Manager) hittable.Hittable {
 	switch s.Type {
 	case "sphere":
 		return shape.Sphere{
-			Center: primitives.Vector{
-				I: s.Center[0],
-				J: s.Center[1],
-				K: s.Center[2],
-			},
+			Center:   ConvertToVector(s.Center),
 			Radius:   s.Radius,
 			Material: material.ToMaterial(),
 		}
@@ -91,4 +95,22 @@ func (m *Manager) ToHittables() hittable.Hittable {
 		list.Add(newHittable)
 	}
 	return list
+}
+
+func (m *Manager) GetCamera() *camera.Camera {
+	cam := camera.DefaultCamera()
+	cam.Position = ConvertToVector(m.Camera.Position)
+	cam.LookAt = ConvertToVector(m.Camera.LookAt)
+	cam.Up = ConvertToVector(m.Camera.Up)
+	cam.FOV = m.Camera.FOV
+	cam.SpaceColor = ConvertToVector(m.Camera.SpaceColor)
+	return cam
+}
+
+func ConvertToVector(v [3]float64) primitives.Vector {
+	return primitives.Vector{
+		I: v[0],
+		J: v[1],
+		K: v[2],
+	}
 }

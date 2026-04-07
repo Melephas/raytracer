@@ -128,6 +128,13 @@ func (v Vector) Reflect(normal Vector) Vector {
 	return normal.Scale(-2 * v.Dot(normal)).Add(v)
 }
 
+func (v Vector) Refract(normal Vector, etaiOverEtat float64) Vector {
+	cosTheta := math.Min(v.Negate().Dot(normal), 1)
+	rOutPerp := v.Add(normal.Scale(cosTheta)).Scale(etaiOverEtat)
+	rOutParallel := normal.Scale(-math.Sqrt(math.Abs(1 - rOutPerp.LengthSquared())))
+	return rOutPerp.Add(rOutParallel)
+}
+
 //// Random returns a Vector with random components in [0, 1).
 //func Random() Vector {
 //	return Vector{internal.RandomFloat(), internal.RandomFloat(), internal.RandomFloat()}

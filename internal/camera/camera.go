@@ -17,20 +17,27 @@ import (
 type Camera struct {
 	Position, FirstPixel      primitives.Vector
 	PixelDV, PixelDU          primitives.Vector
+	Up, LookAt                primitives.Vector
+	U, V, W                   primitives.Vector
 	AspectRatio, SamplesScale float64
 	ImageWidth, ImageHeight   int
 	SamplesPerPixel, MaxDepth int
 	Parallel                  bool
+	FOV                       float64
+	SpaceColor                primitives.Vector
 }
 
 // DefaultCamera returns a camera with default values.
 func DefaultCamera() *Camera {
 	return &Camera{
 		Position:        primitives.Vector{},
+		Up:              primitives.Vector{J: 1},
+		LookAt:          primitives.Vector{K: -1},
 		AspectRatio:     16.0 / 9.0,
 		ImageWidth:      1920,
 		SamplesPerPixel: 100,
 		MaxDepth:        50,
+		FOV:             90,
 	}
 }
 
@@ -127,23 +134,28 @@ func (c *Camera) Initialise() {
 
 	c.SamplesScale = 1.0 / float64(c.SamplesPerPixel)
 
-	c.Position = primitives.Vector{}
-
 	// Determine viewport dimensions.
-	focalLength := 1.0
-	viewportHeight := 2.0
+	focalLength := (c.Position.Sub(c.LookAt)).Length()
+	theta := internal.DegreesToRadians(c.FOV)
+	h := math.Tan(theta / 2)
+	viewportHeight := 2.0 * h * focalLength
 	viewportWidth := float64(c.ImageWidth) / float64(c.ImageHeight) * viewportHeight
 
+	// Calculate the camera's basis vectors.
+	c.W = c.Position.Sub(c.LookAt).Normalize()
+	c.U = c.Up.Cross(c.W).Normalize()
+	c.V = c.W.Cross(c.U) // |W X U| = 1 for normalized vectors
+
 	// Calculate the viewport basis vectors.
-	viewportU := primitives.Vector{I: viewportWidth}
-	viewportV := primitives.Vector{J: -viewportHeight}
+	viewportU := c.U.Scale(viewportWidth)
+	viewportV := c.V.Scale(viewportHeight).Negate()
 
 	// Calculate the delta vectors for each pixel.
 	c.PixelDU = viewportU.Scale(1.0 / float64(c.ImageWidth))
 	c.PixelDV = viewportV.Scale(1.0 / float64(c.ImageHeight))
 
 	// Calculate the position of the upper left pixel. WARNING: I have no idea why this works.
-	viewportUpperLeft := c.Position.Sub(primitives.Vector{K: focalLength}).Sub(viewportU.Scale(0.5)).Sub(viewportV.Scale(0.5))
+	viewportUpperLeft := c.Position.Sub(c.W.Scale(focalLength)).Sub(viewportU.Scale(0.5)).Sub(viewportV.Scale(0.5))
 	c.FirstPixel = viewportUpperLeft.Add(c.PixelDU.Add(c.PixelDV).Scale(0.5))
 }
 
@@ -162,9 +174,11 @@ func (c *Camera) RayColor(r primitives.Ray, depth int, world hittable.Hittable) 
 		return attenuation.ColorMultiply(c.RayColor(scattered, depth-1, world))
 	}
 
-	unitDirection := r.Direction.Normalize()
-	a := (unitDirection.Y() + 1.0) * 0.5
-	return primitives.Vector{I: 1, J: 1, K: 1}.Scale(1 - a).Add(primitives.Vector{I: 0.5, J: 0.7, K: 1.0}.Scale(a))
+	// Sky color.
+	//unitDirection := r.Direction.Normalize()
+	//a := (unitDirection.Y() + 1.0) * 0.5
+	//return primitives.Vector{I: 1, J: 1, K: 1}.Scale(1 - a).Add(primitives.Vector{I: 0.5, J: 0.7, K: 1.0}.Scale(a))
+	return c.SpaceColor
 }
 
 // GetRay returns a new ray for the pixel at (i, j) with random sampling.
@@ -181,4 +195,10 @@ func (c *Camera) GetRay(i, j int) primitives.Ray {
 // SampleSquare returns a random 2D vector within a [-0.5, 0.5] unit square.
 func (c *Camera) SampleSquare() primitives.Vector {
 	return primitives.Vector{I: internal.RandomFloat() - 0.5, J: internal.RandomFloat() - 0.5}
+}
+
+// String returns a string representation of the Camera.
+func (c *Camera) String() string {
+	return fmt.Sprintf("Camera {\n\tPosition: %v\n\tFirstPixel: %v\n\tPixelDV: %v\n\tPixelDU: %v\n\tUp: %v\n\tLookAt: %v\n\tU: %v\n\tV: %v\n\tW: %v\n\tAspectRatio: %v\n\tSamplesScale: %v\n\tImageWidth: %d\n\tImageHeight: %d\n\tSamplesPerPixel: %d\n\tMaxDepth: %d\n\tParallel: %v\n\tFOV: %v\n}",
+		c.Position, c.FirstPixel, c.PixelDV, c.PixelDU, c.Up, c.LookAt, c.U, c.V, c.W, c.AspectRatio, c.SamplesScale, c.ImageWidth, c.ImageHeight, c.SamplesPerPixel, c.MaxDepth, c.Parallel, c.FOV)
 }

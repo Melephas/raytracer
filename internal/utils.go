@@ -14,11 +14,11 @@ func LinearToGamma(x float64) float64 {
 	return 0
 }
 
-//// DegreesToRadians converts degrees to radians.
-//func DegreesToRadians(degrees float64) float64 {
-//	return degrees * (math.Pi / 180)
-//}
-//
+// DegreesToRadians converts degrees to radians.
+func DegreesToRadians(degrees float64) float64 {
+	return degrees * (math.Pi / 180)
+}
+
 //// RadiansToDegrees converts radians to degrees.
 //func RadiansToDegrees(radians float64) float64 {
 //	return radians * (180 / math.Pi)

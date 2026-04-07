@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"raytracer/internal/camera"
 	"raytracer/internal/scene"
 )
 
@@ -66,13 +65,16 @@ func main() {
 	world := manager.ToHittables()
 
 	// Camera setup.
-	cam := camera.DefaultCamera()
+	cam := manager.GetCamera()
 	cam.AspectRatio = AspectRatio
 	cam.ImageWidth = ImageWidth
 	cam.SamplesPerPixel = SamplesPerPixel
 	cam.MaxDepth = BounceDepth
 	cam.Parallel = Parallel
+
+	//fmt.Println(cam)
 	cam.Initialise()
+	//fmt.Println(cam)
 
 	fmt.Printf("Output:\n")
 	fmt.Printf("  File name:          %s\n", OutputFile)

@@ -1,0 +1,55 @@
+{
+  "materials": {
+    "left": {
+      "type": "dielectric",
+      "refractionIndex": 0.75
+    },
+    "right": {
+      "type": "metal",
+      "albedo": [0.8, 0.6, 0.2],
+      "fuzz": 1.0
+    },
+    "center": {
+      "type": "lambertian",
+      "albedo": [0.1, 0.2, 0.5],
+      "fuzz": 0.0
+    },
+    "ground": {
+      "type": "lambertian",
+      "albedo": [0.8, 0.8, 0]
+    }
+  },
+  "scene": [
+    {
+      "type": "sphere",
+      "center": [0, -100.5, -1],
+      "radius": 100,
+      "material": "ground"
+    },
+    {
+      "type": "sphere",
+      "center": [0, 0, -1.2],
+      "radius": 0.5,
+      "material": "center"
+    },
+    {
+      "type": "sphere",
+      "center": [1, 0, -1],
+      "radius": 0.5,
+      "material": "right"
+    },
+    {
+      "type": "sphere",
+      "center": [-1, 0, -1],
+      "radius": 0.5,
+      "material": "left"
+    }
+  ],
+  "camera": {
+    "position": [0, 0, 0],
+    "lookAt": [0, 0, -1],
+    "up": [0, 1, 0],
+    "fov": 90,
+    "spaceColor": [0.7, 0.7, 0.7]
+  }
+}
