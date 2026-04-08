@@ -104,6 +104,7 @@ func (m *Manager) GetCamera() *camera.Camera {
 	cam.Up = ConvertToVector(m.Camera.Up)
 	cam.FOV = m.Camera.FOV
 	cam.SpaceColor = ConvertToVector(m.Camera.SpaceColor)
+	cam.GroundColor = ConvertToVector(m.Camera.GroundColor)
 	return cam
 }
 

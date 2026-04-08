@@ -2,7 +2,7 @@
   "materials": {
     "left": {
       "type": "dielectric",
-      "refractionIndex": 0.75
+      "refractionIndex": 1.5
     },
     "right": {
       "type": "metal",
@@ -17,6 +17,10 @@
     "ground": {
       "type": "lambertian",
       "albedo": [0.8, 0.8, 0]
+    },
+    "air": {
+      "type": "dielectric",
+      "refractionIndex": 0.66
     }
   },
   "scene": [
@@ -43,6 +47,12 @@
       "center": [-1, 0, -1],
       "radius": 0.5,
       "material": "left"
+    },
+    {
+      "type": "sphere",
+      "center": [21, 0, -1],
+      "radius": 0.4,
+      "material": "air"
     }
   ],
   "camera": {
@@ -50,6 +60,7 @@
     "lookAt": [0, 0, -1],
     "up": [0, 1, 0],
     "fov": 90,
-    "spaceColor": [0.7, 0.7, 0.7]
+    "spaceColor": [1, 1, 1],
+    "groundColor": [0.5, 0.7, 1]
   }
 }

@@ -118,7 +118,7 @@ This program uses a **Path Tracing** approach:
 
 ## Acknowledgments
 
-This project is inspired by the *Ray Tracing in One Weekend* series.
+This project is inspired by the [_Ray Tracing in One Weekend_](https://raytracing.github.io/books/RayTracingInOneWeekend.html) series.
 
 ## License
 

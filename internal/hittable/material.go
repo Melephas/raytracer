@@ -2,6 +2,7 @@ package hittable
 
 import (
 	"math"
+	"math/rand"
 	"raytracer/internal/primitives"
 )
 
@@ -13,7 +14,7 @@ type Lambertian struct {
 	Albedo primitives.Vector
 }
 
-func (m Lambertian) Scatter(ray primitives.Ray, hitRecord HitRecord) (scattered primitives.Ray, attenuation primitives.Vector, ok bool) {
+func (m Lambertian) Scatter(_ primitives.Ray, hitRecord HitRecord) (scattered primitives.Ray, attenuation primitives.Vector, ok bool) {
 	scatterDirection := hitRecord.Normal.Add(primitives.RandomUnitVector())
 
 	// Catch degenerate scatter direction.
@@ -46,28 +47,35 @@ type Dielectric struct {
 	RefractionIndex float64
 }
 
-func (m Dielectric) Scatter(ray primitives.Ray, hitRecord HitRecord) (scattered primitives.Ray, attenuation primitives.Vector, ok bool) {
-	attenuation = primitives.Vector{I: 1, J: 1, K: 1}
-	var ri float64
+func (m Dielectric) Scatter(ray primitives.Ray, hitRecord HitRecord) (primitives.Ray, primitives.Vector, bool) {
+	attenuation := primitives.Vector{I: 1.0, J: 1.0, K: 1.0}
+	var refractionRatio float64
 	if hitRecord.FrontFace {
-		ri = 1.0 / m.RefractionIndex
+		refractionRatio = 1.0 / m.RefractionIndex
 	} else {
-		ri = m.RefractionIndex
+		refractionRatio = m.RefractionIndex
 	}
 
 	unitDirection := ray.Direction.Normalize()
-	cosTheta := math.Min(unitDirection.Negate().Dot(unitDirection), 1)
-	sinTheta := math.Sqrt(1 - cosTheta*cosTheta)
+	cosTheta := math.Min(unitDirection.Negate().Dot(hitRecord.Normal), 1.0)
+	sinTheta := math.Sqrt(1.0 - cosTheta*cosTheta)
 
-	cannotRefract := ri*sinTheta > 1
+	cannotRefract := refractionRatio*sinTheta > 1.0
 	var direction primitives.Vector
-	if cannotRefract {
+
+	if cannotRefract || reflectance(cosTheta, refractionRatio) > rand.Float64() {
 		direction = unitDirection.Reflect(hitRecord.Normal)
 	} else {
-		direction = unitDirection.Refract(hitRecord.Normal, ri)
+		direction = unitDirection.Refract(hitRecord.Normal, refractionRatio)
 	}
 
-	scattered = primitives.Ray{Origin: hitRecord.P, Direction: direction}
-	ok = true
-	return
+	scattered := primitives.Ray{Origin: hitRecord.P, Direction: direction}
+	return scattered, attenuation, true
+}
+
+func reflectance(cosine, refractionRatio float64) float64 {
+	// Use Schlick's approximation for reflectance.
+	r0 := (1 - refractionRatio) / (1 + refractionRatio)
+	r0 = r0 * r0
+	return r0 + (1-r0)*math.Pow(1-cosine, 5)
 }

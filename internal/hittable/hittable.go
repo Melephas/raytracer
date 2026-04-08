@@ -13,17 +13,13 @@ type HitRecord struct {
 }
 
 // SetFaceNormal determines if a hit is on the front or back face and sets the normal accordingly.
-func (r HitRecord) SetFaceNormal(ray primitives.Ray, outwardNormal primitives.Vector) HitRecord {
-	ret := r
-
-	frontFace := ray.Direction.Dot(outwardNormal) < 0
-	if frontFace {
-		ret.Normal = outwardNormal
+func (r *HitRecord) SetFaceNormal(ray primitives.Ray, outwardNormal primitives.Vector) {
+	r.FrontFace = ray.Direction.Dot(outwardNormal) < 0
+	if r.FrontFace {
+		r.Normal = outwardNormal
 	} else {
-		ret.Normal = outwardNormal.Negate()
+		r.Normal = outwardNormal.Negate()
 	}
-
-	return ret
 }
 
 // Hittable defines the interface for objects that can be hit by a ray.

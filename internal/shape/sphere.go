@@ -44,7 +44,7 @@ func (s Sphere) Hit(ray primitives.Ray, rayT primitives.Interval) (*hittable.Hit
 		Normal:   outwardNormal,
 		Material: s.Material,
 	}
-	hitRecord = hitRecord.SetFaceNormal(ray, outwardNormal)
+	hitRecord.SetFaceNormal(ray, outwardNormal)
 
 	return &hitRecord, true
 }

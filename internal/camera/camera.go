@@ -24,7 +24,7 @@ type Camera struct {
 	SamplesPerPixel, MaxDepth int
 	Parallel                  bool
 	FOV                       float64
-	SpaceColor                primitives.Vector
+	SpaceColor, GroundColor   primitives.Vector
 }
 
 // DefaultCamera returns a camera with default values.
@@ -175,10 +175,10 @@ func (c *Camera) RayColor(r primitives.Ray, depth int, world hittable.Hittable) 
 	}
 
 	// Sky color.
-	//unitDirection := r.Direction.Normalize()
-	//a := (unitDirection.Y() + 1.0) * 0.5
-	//return primitives.Vector{I: 1, J: 1, K: 1}.Scale(1 - a).Add(primitives.Vector{I: 0.5, J: 0.7, K: 1.0}.Scale(a))
-	return c.SpaceColor
+	unitDirection := r.Direction.Normalize()
+	a := (unitDirection.Y() + 1.0) * 0.5
+	return c.SpaceColor.Scale(1 - a).Add(c.GroundColor.Scale(a))
+	//return c.SpaceColor
 }
 
 // GetRay returns a new ray for the pixel at (i, j) with random sampling.
