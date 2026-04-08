@@ -24,12 +24,14 @@ type Shape struct {
 }
 
 type Camera struct {
-	Position    [3]float64 `json:"position"`
-	LookAt      [3]float64 `json:"lookAt"`
-	Up          [3]float64 `json:"up"`
-	FOV         float64    `json:"fov"`
-	SpaceColor  [3]float64 `json:"spaceColor"`
-	GroundColor [3]float64 `json:"groundColor"`
+	Position     [3]float64 `json:"position"`
+	LookAt       [3]float64 `json:"lookAt"`
+	Up           [3]float64 `json:"up"`
+	FOV          float64    `json:"fov"`
+	SpaceColor   [3]float64 `json:"spaceColor"`
+	GroundColor  [3]float64 `json:"groundColor"`
+	DefocusAngle float64    `json:"defocusAngle"`
+	FocusDist    float64    `json:"focusDist"`
 }
 
 type Manager struct {
@@ -105,6 +107,8 @@ func (m *Manager) GetCamera() *camera.Camera {
 	cam.FOV = m.Camera.FOV
 	cam.SpaceColor = ConvertToVector(m.Camera.SpaceColor)
 	cam.GroundColor = ConvertToVector(m.Camera.GroundColor)
+	cam.DefocusAngle = m.Camera.DefocusAngle
+	cam.FocusDist = m.Camera.FocusDist
 	return cam
 }
 

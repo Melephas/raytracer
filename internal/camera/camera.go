@@ -15,16 +15,17 @@ import (
 
 // Camera represents a virtual camera that renders a scene.
 type Camera struct {
-	Position, FirstPixel      primitives.Vector
-	PixelDV, PixelDU          primitives.Vector
-	Up, LookAt                primitives.Vector
-	U, V, W                   primitives.Vector
-	AspectRatio, SamplesScale float64
-	ImageWidth, ImageHeight   int
-	SamplesPerPixel, MaxDepth int
-	Parallel                  bool
-	FOV                       float64
-	SpaceColor, GroundColor   primitives.Vector
+	Position, FirstPixel         primitives.Vector
+	PixelDV, PixelDU             primitives.Vector
+	Up, LookAt                   primitives.Vector
+	U, V, W                      primitives.Vector
+	AspectRatio, SamplesScale    float64
+	ImageWidth, ImageHeight      int
+	SamplesPerPixel, MaxDepth    int
+	Parallel                     bool
+	FOV, DefocusAngle, FocusDist float64
+	SpaceColor, GroundColor      primitives.Vector
+	DefocusDiskU, DefocusDiskV   primitives.Vector
 }
 
 // DefaultCamera returns a camera with default values.
@@ -135,10 +136,9 @@ func (c *Camera) Initialise() {
 	c.SamplesScale = 1.0 / float64(c.SamplesPerPixel)
 
 	// Determine viewport dimensions.
-	focalLength := (c.Position.Sub(c.LookAt)).Length()
 	theta := internal.DegreesToRadians(c.FOV)
 	h := math.Tan(theta / 2)
-	viewportHeight := 2.0 * h * focalLength
+	viewportHeight := 2.0 * h * c.FocusDist
 	viewportWidth := float64(c.ImageWidth) / float64(c.ImageHeight) * viewportHeight
 
 	// Calculate the camera's basis vectors.
@@ -154,9 +154,14 @@ func (c *Camera) Initialise() {
 	c.PixelDU = viewportU.Scale(1.0 / float64(c.ImageWidth))
 	c.PixelDV = viewportV.Scale(1.0 / float64(c.ImageHeight))
 
-	// Calculate the position of the upper left pixel. WARNING: I have no idea why this works.
-	viewportUpperLeft := c.Position.Sub(c.W.Scale(focalLength)).Sub(viewportU.Scale(0.5)).Sub(viewportV.Scale(0.5))
+	// Calculate the position of the upper left pixel.
+	viewportUpperLeft := c.Position.Sub(c.W.Scale(c.FocusDist)).Sub(viewportU.Scale(0.5)).Sub(viewportV.Scale(0.5))
 	c.FirstPixel = viewportUpperLeft.Add(c.PixelDU.Add(c.PixelDV).Scale(0.5))
+
+	// Calculate the defocus disk vectors.
+	defocusRadius := c.FocusDist * math.Tan(internal.DegreesToRadians(c.DefocusAngle/2.0))
+	c.DefocusDiskU = c.U.Scale(defocusRadius)
+	c.DefocusDiskV = c.V.Scale(defocusRadius)
 }
 
 // RayColor computes the color for a given ray in the world.
@@ -186,7 +191,12 @@ func (c *Camera) GetRay(i, j int) primitives.Ray {
 	offset := c.SampleSquare()
 	pixelSample := c.FirstPixel.Add(c.PixelDU.Scale(float64(i) + offset.X())).Add(c.PixelDV.Scale(float64(j) + offset.Y()))
 
-	rayOrigin := c.Position
+	var rayOrigin primitives.Vector
+	if c.DefocusAngle <= 0.0 {
+		rayOrigin = c.Position
+	} else {
+		rayOrigin = c.DefocusDiskSample()
+	}
 	rayDirection := pixelSample.Sub(rayOrigin).Normalize()
 
 	return primitives.Ray{Origin: rayOrigin, Direction: rayDirection}
@@ -201,4 +211,9 @@ func (c *Camera) SampleSquare() primitives.Vector {
 func (c *Camera) String() string {
 	return fmt.Sprintf("Camera {\n\tPosition: %v\n\tFirstPixel: %v\n\tPixelDV: %v\n\tPixelDU: %v\n\tUp: %v\n\tLookAt: %v\n\tU: %v\n\tV: %v\n\tW: %v\n\tAspectRatio: %v\n\tSamplesScale: %v\n\tImageWidth: %d\n\tImageHeight: %d\n\tSamplesPerPixel: %d\n\tMaxDepth: %d\n\tParallel: %v\n\tFOV: %v\n}",
 		c.Position, c.FirstPixel, c.PixelDV, c.PixelDU, c.Up, c.LookAt, c.U, c.V, c.W, c.AspectRatio, c.SamplesScale, c.ImageWidth, c.ImageHeight, c.SamplesPerPixel, c.MaxDepth, c.Parallel, c.FOV)
+}
+
+func (c *Camera) DefocusDiskSample() primitives.Vector {
+	p := primitives.RandomInUnitDisc()
+	return c.Position.Add(c.DefocusDiskU.Scale(p.I)).Add(c.DefocusDiskV.Scale(p.J))
 }

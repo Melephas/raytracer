@@ -158,6 +158,15 @@ func RandomUnitVector() Vector {
 	}
 }
 
+func RandomInUnitDisc() Vector {
+	for {
+		p := Vector{internal.RandomFloatInRange(-1, 1), internal.RandomFloatInRange(-1, 1), 0}
+		if p.LengthSquared() < 1 {
+			return p
+		}
+	}
+}
+
 //func RandomInHemisphere(normal Vector) Vector {
 //	unitVector := RandomUnitVector()
 //	if unitVector.Dot(normal) > 0 {
