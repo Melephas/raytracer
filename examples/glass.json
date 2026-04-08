@@ -17,10 +17,6 @@
     "ground": {
       "type": "lambertian",
       "albedo": [0.8, 0.8, 0]
-    },
-    "air": {
-      "type": "dielectric",
-      "refractionIndex": 0.66
     }
   },
   "scene": [
@@ -50,17 +46,19 @@
     },
     {
       "type": "sphere",
-      "center": [21, 0, -1],
-      "radius": 0.4,
-      "material": "air"
+      "center": [-1, 0, -1],
+      "radius": -0.4,
+      "material": "left"
     }
   ],
   "camera": {
-    "position": [0, 0, 0],
+    "position": [-2, 2, 1],
     "lookAt": [0, 0, -1],
     "up": [0, 1, 0],
-    "fov": 90,
+    "fov": 20,
     "spaceColor": [1, 1, 1],
-    "groundColor": [0.5, 0.7, 1]
+    "groundColor": [0.5, 0.7, 1],
+    "defocusAngle": 10,
+    "focusDist": 3.4
   }
 }

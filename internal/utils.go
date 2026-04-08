@@ -28,3 +28,7 @@ func DegreesToRadians(degrees float64) float64 {
 func RandomFloat() float64 {
 	return rand.Float64()
 }
+
+func RandomFloatInRange(min, max float64) float64 {
+	return min + rand.Float64()*(max-min)
+}

@@ -29,6 +29,8 @@
     "up": [0, 1, 0],
     "fov": 45,
     "spaceColor": [0.7, 0.7, 0.7],
-    "groundColor": [0.2, 0.2, 0.2]
+    "groundColor": [0.2, 0.2, 0.2],
+    "defocusAngle": 0,
+    "focusDist": 1
   }
 }

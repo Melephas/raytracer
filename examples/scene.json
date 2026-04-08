@@ -50,7 +50,9 @@
         "lookAt": [0, 0, -1],
         "up": [0, 1, 0],
         "fov": 90,
-        "spaceColor": [0.7, 0.7, 0.7],
-        "groundColor": [0.2, 0.2, 0.2]
+        "spaceColor": [1, 1, 1],
+        "groundColor": [0.5, 0.7, 1],
+        "defocusAngle": 0,
+        "focusDist": 1
     }
 }
