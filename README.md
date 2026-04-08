@@ -14,6 +14,10 @@ Generated with the example scene at 1024 samples-per-pixel
 
 Generated at 8K with 512 samples-per-pixel
 
+![output](https://github.com/user-attachments/assets/d9bda5a1-fd32-4d20-aa74-8d931196b784)
+
+An example demonstrating depth of field
+
 ## Features
 
 - **Concurrent Rendering**: Fully leverages multicore processors for significantly faster rendering times using Go's goroutines (~5x speedup).
