@@ -23,6 +23,7 @@ Generated with the example scene at 1024 samples-per-pixel
 
 ## Future Features
 
+- **Accurate Lighting**: Implement realistic lighting models.
 - **GPU Acceleration**: Leverage GPU acceleration for even faster rendering times, especially for complex scenes.
 - **Material Library**: Allow users to define custom materials and reuse them across scenes.
 - **Additional Shapes**: Support for shapes that aren't just spheres.
