@@ -4,11 +4,15 @@ A ray tracer written in Go. This project implements a path tracing algorithm to 
 
 This is a personal project for learning and experimenting with Go.
 
-## Example
+## Examples
 
 ![output](https://github.com/user-attachments/assets/10a8df2f-2fa2-4af1-bbe4-5718515bb8d3)
 
 Generated with the example scene at 1024 samples-per-pixel
+
+![output](https://github.com/user-attachments/assets/b24fecec-3bca-4280-9158-46ac82c05a8d)
+
+Generated at 8K with 512 samples-per-pixel
 
 ## Features
 
