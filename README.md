@@ -17,13 +17,13 @@ Generated with the example scene at 1024 samples-per-pixel
 - **Materials Support**:
   - **Lambertian (Diffuse)**: For non-reflective, matte surfaces.
   - **Metal**: For polished, reflective surfaces with adjustable atmospheric "fuzziness."
+  - **Dielectric**: For transparent materials like glass and water.
 - **Configurable Parameters**: Control image resolution, samples per pixel (for antialiasing), and ray bounce depth via CLI flags.
 - **PPM Output**: Generates images in the simple and widely supported Portable Pixmap (PPM) format.
 
 ## Future Features
 
 - **GPU Acceleration**: Leverage GPU acceleration for even faster rendering times, especially for complex scenes.
-- **Dielectric Materials**: Support for transparent materials like glass and water.
 - **Material Library**: Allow users to define custom materials and reuse them across scenes.
 - **Additional Shapes**: Support for shapes that aren't just spheres.
 - **Other Image Formats**: Support for more image formats.
